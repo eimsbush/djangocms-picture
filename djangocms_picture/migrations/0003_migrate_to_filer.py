@@ -24,6 +24,7 @@ def migrate_to_filer(apps, schema_editor):
                 file=plugin.image.file,
                 defaults={
                     'name': filename,
+                    'original_filename': filename,
                     'default_alt_text': plugin.alt,
                     'default_caption': plugin.longdesc
                 }
