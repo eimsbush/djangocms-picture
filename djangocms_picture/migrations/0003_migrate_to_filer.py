@@ -21,7 +21,7 @@ def migrate_to_filer(apps, schema_editor):
             filename = plugin.image.name.split('/')[-1]
             old_path = os.path.join(settings.MEDIA_ROOT, str(plugin.image))
             picture = Image.objects.get_or_create(
-                file=plugin.image,
+                file=plugin.image.file,
                 defaults={
                     'name': filename,
                     'original_filename': filename,
