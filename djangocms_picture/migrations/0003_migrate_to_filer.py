@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import os
+import tarfile
 
 import django.db.models.deletion
 import filer.fields.image
@@ -31,13 +32,17 @@ def migrate_to_filer(apps, schema_editor):
             )[0]
             plugins.filter(pk=plugin.pk).update(picture=picture)
             remove_files.append(old_path)
-    for old_path in remove_files:
-        try:
-            os.remove(old_path)
-        except:
-            pass
-        else:
-            print("Remove migrated {}".format(old_path))
+    remove_files = set(list(remove_files))
+    if len(remove_files):
+        with tarfile.open(os.path.abspath(os.path.join(settings.MEDIA_ROOT, '../cms_page_media_picture_backup.tar.gz', 'w:gz'))) as tar:
+            for old_path in remove_files:
+                tar.add(old_path, recursive=False)
+                try:
+                    os.remove(old_path)
+                except:
+                    pass
+                else:
+                    print("Remove migrated {}".format(old_path))
 
 
 class Migration(migrations.Migration):
