@@ -21,17 +21,21 @@ def migrate_to_filer(apps, schema_editor):
         if plugin.image:
             filename = plugin.image.name.split('/')[-1]
             old_path = os.path.join(settings.MEDIA_ROOT, str(plugin.image))
-            picture = Image.objects.get_or_create(
-                file=plugin.image.file,
-                defaults={
-                    'name': filename,
-                    'original_filename': filename,
-                    'default_alt_text': plugin.alt,
-                    'default_caption': plugin.longdesc
-                }
-            )[0]
-            plugins.filter(pk=plugin.pk).update(picture=picture)
-            remove_files.append(old_path)
+            try:
+                picture = Image.objects.get_or_create(
+                    file=plugin.image.file,
+                    defaults={
+                        'name': filename,
+                        'original_filename': filename,
+                        'default_alt_text': plugin.alt,
+                        'default_caption': plugin.longdesc
+                    }
+                )[0]
+            except IOError as e:
+                print(e)
+            else:
+                plugins.filter(pk=plugin.pk).update(picture=picture)
+                remove_files.append(old_path)
     remove_files = set(list(remove_files))
     if len(remove_files):
         with tarfile.open(os.path.abspath(os.path.join(settings.MEDIA_ROOT, '../cms_page_media_picture_backup.tar.gz')),
